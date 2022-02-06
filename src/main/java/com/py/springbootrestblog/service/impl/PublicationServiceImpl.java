@@ -7,11 +7,13 @@ package com.py.springbootrestblog.service.impl;
 import com.py.springbootrestblog.model.Publication;
 import com.py.springbootrestblog.repository.PublicationRepository;
 import com.py.springbootrestblog.service.PublicationService;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,14 +27,18 @@ public class PublicationServiceImpl implements PublicationService {
     private PublicationRepository publicationRepository;
 
     @Override
-    public Page<Publication> findAll(Integer page, Integer size) {
-        Pageable pageable;
+    public List<Publication> findAll(String sortBy, String sortDir) {
 
-        if (page != null && size != null) {
-            pageable = PageRequest.of(page, size);
-        } else {
-            pageable = Pageable.unpaged();
-        }
+        Sort sort = Sort.by("asc".equals(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
+        
+        return publicationRepository.findAll(sort);
+    }
+
+    @Override
+    public Page<Publication> paginated(Integer page, Integer size, String sortBy, String sortDir) {
+
+        Sort sort = Sort.by("asc".equals(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         return publicationRepository.findAll(pageable);
     }

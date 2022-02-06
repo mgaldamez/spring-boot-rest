@@ -44,14 +44,40 @@ public class PublicationController {
     PublicationService publicationService;
 
     @GetMapping
-    public ResponseEntity<CustomResponse<Page<Publication>>> findAll(
-            @RequestParam(value = "page", required = false) Integer page,
-            @RequestParam(value = "size", required = false) Integer size
+    public ResponseEntity<CustomResponse<List<Publication>>> findAll(
+            @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir) {
+
+        CustomResponse<List<Publication>> response = new CustomResponse<>();
+
+        try {
+            List<Publication> list = publicationService.findAll(sortBy, sortDir);
+
+            response.setMessage("Publications listing obtain sucessfully");
+            response.setError(false);
+            response.setData(list);
+
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+
+            response.setMessage("Publications listing obtain unsucessfully: " + e.getMessage());
+            response.setError(true);
+            response.setData(null);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<CustomResponse<Page<Publication>>> paginated(
+            @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir
     ) {
         CustomResponse<Page<Publication>> response = new CustomResponse<>();
 
         try {
-            Page<Publication> list = publicationService.findAll(page, size);
+            Page<Publication> list = publicationService.paginated(page, size, sortBy, sortDir);
 
             response.setMessage("Publications listing obtain sucessfully");
             response.setError(false);

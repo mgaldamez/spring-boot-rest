@@ -5,6 +5,7 @@
 package com.py.springbootrestblog.service;
 
 import com.py.springbootrestblog.model.Publication;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 
@@ -14,7 +15,9 @@ import org.springframework.data.domain.Page;
  */
 public interface PublicationService {
 
-    public Page<Publication> findAll(Integer page, Integer size);
+    public List<Publication> findAll(String sortBy, String sortDir);
+
+    public Page<Publication> paginated(Integer page, Integer size, String sortBy, String sortDir);
 
     public Optional<Publication> findById(Long id);
 
