@@ -6,6 +6,7 @@ package com.py.springbootrestblog.repository;
 
 import com.py.springbootrestblog.model.Publication;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,6 +14,6 @@ import org.springframework.stereotype.Repository;
  * @author Favio Amarilla
  */
 @Repository
-public interface PublicationRepository extends JpaRepository<Publication, Long> {
-    
+public interface PublicationRepository extends JpaRepository<Publication, Long>, PagingAndSortingRepository<Publication, Long> {
+
 }

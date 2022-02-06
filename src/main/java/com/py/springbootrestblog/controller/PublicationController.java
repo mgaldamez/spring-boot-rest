@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -42,20 +44,23 @@ public class PublicationController {
     PublicationService publicationService;
 
     @GetMapping
-    public ResponseEntity<CustomResponse<List<PublicationDTO>>> findAll() {
-        CustomResponse<List<PublicationDTO>> response = new CustomResponse<>();
+    public ResponseEntity<CustomResponse<Page<Publication>>> findAll(
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size
+    ) {
+        CustomResponse<Page<Publication>> response = new CustomResponse<>();
 
         try {
-            List<Publication> list = publicationService.findAll();
+            Page<Publication> list = publicationService.findAll(page, size);
 
             response.setMessage("Publications listing obtain sucessfully");
             response.setError(false);
-            response.setData(mapper.map(list, typeDTO));
+            response.setData(list);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publications listing obtain unsucessfully");
+            response.setMessage("Publications listing obtain unsucessfully: " + e.getMessage());
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -102,7 +107,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication create unsucessfully; " + e.getMessage());
+            response.setMessage("Publication create unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -132,7 +137,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication update unsucessfully" + e.getMessage());
+            response.setMessage("Publication update unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -161,7 +166,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication delete unsucessfully; " + e.getMessage());
+            response.setMessage("Publication delete unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
