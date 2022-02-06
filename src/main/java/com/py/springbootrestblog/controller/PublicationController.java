@@ -40,22 +40,26 @@ public class PublicationController {
     Type typeDTO = new TypeToken<List<PublicationDTO>>() {
     }.getType();
 
+    Type typePageDTO = new TypeToken<Page<PublicationDTO>>() {
+    }.getType();
+
     @Autowired
     PublicationService publicationService;
 
     @GetMapping
-    public ResponseEntity<CustomResponse<List<Publication>>> findAll(
+    public ResponseEntity<CustomResponse<List<PublicationDTO>>> findAll(
             @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir) {
 
-        CustomResponse<List<Publication>> response = new CustomResponse<>();
+        CustomResponse<List<PublicationDTO>> response = new CustomResponse<>();
 
         try {
             List<Publication> list = publicationService.findAll(sortBy, sortDir);
+            List<PublicationDTO> listDto = mapper.map(list, typeDTO);
 
             response.setMessage("Publications listing obtain sucessfully");
             response.setError(false);
-            response.setData(list);
+            response.setData(listDto);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -68,20 +72,21 @@ public class PublicationController {
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<CustomResponse<Page<Publication>>> paginated(
+    public ResponseEntity<CustomResponse<Page<PublicationDTO>>> paginated(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
             @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir
     ) {
-        CustomResponse<Page<Publication>> response = new CustomResponse<>();
+        CustomResponse<Page<PublicationDTO>> response = new CustomResponse<>();
 
         try {
             Page<Publication> list = publicationService.paginated(page, size, sortBy, sortDir);
+            Page<PublicationDTO> listDto = mapper.map(list, typePageDTO);
 
             response.setMessage("Publications listing obtain sucessfully");
             response.setError(false);
-            response.setData(list);
+            response.setData(listDto);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
