@@ -5,9 +5,10 @@
 package com.py.springbootrestblog.controller;
 
 import com.py.springbootrestblog.dto.CustomResponse;
-import com.py.springbootrestblog.dto.PublicationDTO;
+import com.py.springbootrestblog.dto.CommentDTO;
+import com.py.springbootrestblog.model.Comment;
 import com.py.springbootrestblog.model.Publication;
-import com.py.springbootrestblog.service.PublicationService;
+import com.py.springbootrestblog.service.CommentService;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
@@ -32,40 +33,39 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Favio Amarilla
  */
 @RestController
-@RequestMapping("api/publication")
-public class PublicationController {
+@RequestMapping("api/comment")
+public class CommentController {
 
     @Autowired
     ModelMapper mapper;
 
-    Type typeDTO = new TypeToken<List<PublicationDTO>>() {
+    Type typeDTO = new TypeToken<List<CommentDTO>>() {
     }.getType();
-
-    Type typePageDTO = new TypeToken<Page<PublicationDTO>>() {
+    Type typePageDTO = new TypeToken<Page<CommentDTO>>() {
     }.getType();
 
     @Autowired
-    PublicationService publicationService;
+    CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<CustomResponse<List<PublicationDTO>>> findAll(
+    public ResponseEntity<CustomResponse<List<CommentDTO>>> findAll(
             @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir) {
 
-        CustomResponse<List<PublicationDTO>> response = new CustomResponse<>();
+        CustomResponse<List<CommentDTO>> response = new CustomResponse<>();
 
         try {
-            List<Publication> list = publicationService.findAll(sortBy, sortDir);
-            List<PublicationDTO> listDto = mapper.map(list, typeDTO);
+            List<Comment> list = commentService.findAll(sortBy, sortDir);
+            List<CommentDTO> listDTO = mapper.map(list, typeDTO);
 
-            response.setMessage("Publications listing obtain sucessfully");
+            response.setMessage("Comments listing obtain sucessfully");
             response.setError(false);
-            response.setData(listDto);
+            response.setData(listDTO);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publications listing obtain unsucessfully: " + e.getMessage());
+            response.setMessage("Comments listing obtain unsucessfully: " + e.getMessage());
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -73,26 +73,49 @@ public class PublicationController {
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<CustomResponse<Page<PublicationDTO>>> paginated(
+    public ResponseEntity<CustomResponse<Page<CommentDTO>>> paginated(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
             @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir
     ) {
-        CustomResponse<Page<PublicationDTO>> response = new CustomResponse<>();
+        CustomResponse<Page<CommentDTO>> response = new CustomResponse<>();
 
         try {
-            Page<Publication> list = publicationService.paginated(page, size, sortBy, sortDir);
-            Page<PublicationDTO> listDto = mapper.map(list, typePageDTO);
+            Page<Comment> list = commentService.paginated(page, size, sortBy, sortDir);
+            Page<CommentDTO> listDTO = mapper.map(list, typePageDTO);
 
-            response.setMessage("Publications listing obtain sucessfully");
+            response.setMessage("Comments listing obtain sucessfully");
             response.setError(false);
-            response.setData(listDto);
+            response.setData(listDTO);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publications listing obtain unsucessfully: " + e.getMessage());
+            response.setMessage("Comments listing obtain unsucessfully: " + e.getMessage());
+            response.setError(true);
+            response.setData(null);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/publication/{id}")
+    public ResponseEntity<CustomResponse<List<CommentDTO>>> findByPublication(@PathVariable("id") Long id) {
+
+        CustomResponse<List<CommentDTO>> response = new CustomResponse<>();
+
+        try {
+            List<Comment> list = commentService.findByPublication(new Publication(id));
+            List<CommentDTO> listDTO = mapper.map(list, typeDTO);
+
+            response.setMessage("Comments listing obtain sucessfully");
+            response.setError(false);
+            response.setData(listDTO);
+
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+
+            response.setMessage("Comments listing obtain unsucessfully: " + e.getMessage());
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -100,17 +123,17 @@ public class PublicationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomResponse<PublicationDTO>> findById(@PathVariable("id") Long id) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+    public ResponseEntity<CustomResponse<CommentDTO>> findById(@PathVariable("id") Long id) {
+        CustomResponse<CommentDTO> response = new CustomResponse<>();
 
         try {
-            Optional<Publication> entity = publicationService.findById(id);
+            Optional<Comment> entity = commentService.findById(id);
             if (entity.isPresent()) {
-                response.setMessage("Publication obtain sucessfully");
+                response.setMessage("Comment obtain sucessfully");
                 response.setError(false);
-                response.setData(mapper.map(entity.get(), PublicationDTO.class));
+                response.setData(mapper.map(entity.get(), CommentDTO.class));
             } else {
-                response.setMessage("Publication not found");
+                response.setMessage("Comment not found");
                 response.setError(true);
                 response.setData(null);
             }
@@ -118,7 +141,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication obtain unsucessfully");
+            response.setMessage("Comment obtain unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -126,20 +149,20 @@ public class PublicationController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomResponse<PublicationDTO>> save(@RequestBody PublicationDTO body) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+    public ResponseEntity<CustomResponse<CommentDTO>> save(@RequestBody CommentDTO body) {
+        CustomResponse<CommentDTO> response = new CustomResponse<>();
 
         try {
-            Publication persist = publicationService.save(mapper.map(body, Publication.class));
+            Comment persist = commentService.save(mapper.map(body, Comment.class));
 
-            response.setMessage("Publication create sucessfully");
+            response.setMessage("Comment create sucessfully");
             response.setError(false);
-            response.setData(mapper.map(persist, PublicationDTO.class));
+            response.setData(mapper.map(persist, CommentDTO.class));
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication create unsucessfully");
+            response.setMessage("Comment create unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -147,21 +170,21 @@ public class PublicationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomResponse<PublicationDTO>> update(@RequestBody PublicationDTO body,
+    public ResponseEntity<CustomResponse<CommentDTO>> update(@RequestBody CommentDTO body,
             @PathVariable("id") Long id) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+        CustomResponse<CommentDTO> response = new CustomResponse<>();
 
         try {
-            Optional<Publication> entity = publicationService.findById(id);
+            Optional<Comment> entity = commentService.findById(id);
             if (entity.isPresent()) {
                 body.setId(id);
-                Publication persist = publicationService.save(mapper.map(body, Publication.class));
+                Comment persist = commentService.save(mapper.map(body, Comment.class));
 
-                response.setMessage("Publication update sucessfully");
+                response.setMessage("Comment update sucessfully");
                 response.setError(false);
-                response.setData(mapper.map(persist, PublicationDTO.class));
+                response.setData(mapper.map(persist, CommentDTO.class));
             } else {
-                response.setMessage("Publication not found");
+                response.setMessage("Comment not found");
                 response.setError(true);
                 response.setData(null);
             }
@@ -169,7 +192,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication update unsucessfully");
+            response.setMessage("Comment update unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -177,20 +200,20 @@ public class PublicationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CustomResponse<PublicationDTO>> delete(@RequestBody PublicationDTO body,
+    public ResponseEntity<CustomResponse<CommentDTO>> delete(@RequestBody CommentDTO body,
             @PathVariable("id") Long id) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+        CustomResponse<CommentDTO> response = new CustomResponse<>();
 
         try {
-            Optional<Publication> entity = publicationService.findById(id);
+            Optional<Comment> entity = commentService.findById(id);
             if (entity.isPresent()) {
-                publicationService.delete(id);
+                commentService.delete(id);
 
-                response.setMessage("Publication delete sucessfully");
+                response.setMessage("Comment delete sucessfully");
                 response.setError(false);
                 response.setData(null);
             } else {
-                response.setMessage("Publication not found");
+                response.setMessage("Comment not found");
                 response.setError(true);
                 response.setData(null);
             }
@@ -198,7 +221,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication delete unsucessfully");
+            response.setMessage("Comment delete unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
