@@ -4,6 +4,9 @@
  */
 package com.py.springbootrestblog.dto;
 
+import com.py.springbootrestblog.model.Comment;
+import com.py.springbootrestblog.model.Publication;
+
 /**
  *
  * @author Favio Amarilla
@@ -15,6 +18,21 @@ public class CommentDTO {
     private PublicationDTO publication;
 
     public CommentDTO() {
+    }
+
+    public CommentDTO(Comment entity) {
+        this.id = entity.getId();
+        this.content = entity.getContent();
+        this.publication = new PublicationDTO(entity.getPublication());
+    }
+
+    public Comment build() {
+        Comment entity = new Comment();
+        entity.setId(this.id);
+        entity.setContent(this.content);
+        entity.setPublication(this.publication.build());
+
+        return entity;
     }
 
     public Long getId() {

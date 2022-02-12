@@ -20,6 +20,23 @@ public class PublicationDTO {
     public PublicationDTO() {
     }
 
+    public PublicationDTO(Publication entity) {
+        this.id = entity.getId();
+        this.title = entity.getTitle();
+        this.description = entity.getDescription();
+        this.content = entity.getContent();
+    }
+
+    public Publication build() {
+        Publication entity = new Publication();
+        entity.setId(this.id);
+        entity.setTitle(this.title);
+        entity.setDescription(this.description);
+        entity.setContent(this.content);
+
+        return entity;
+    }
+
     public Long getId() {
         return id;
     }

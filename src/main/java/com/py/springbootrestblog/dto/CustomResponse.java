@@ -17,6 +17,12 @@ public class CustomResponse<T> {
     public CustomResponse() {
     }
 
+    public CustomResponse(String message, boolean error, T data) {
+        this.message = message;
+        this.error = error;
+        this.data = data;
+    }
+
     public String getMessage() {
         return message;
     }

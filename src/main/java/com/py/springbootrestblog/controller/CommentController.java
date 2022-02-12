@@ -9,11 +9,9 @@ import com.py.springbootrestblog.dto.CommentDTO;
 import com.py.springbootrestblog.model.Comment;
 import com.py.springbootrestblog.model.Publication;
 import com.py.springbootrestblog.service.CommentService;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,14 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommentController {
 
     @Autowired
-    ModelMapper mapper;
-
-    Type typeDTO = new TypeToken<List<CommentDTO>>() {
-    }.getType();
-    Type typePageDTO = new TypeToken<Page<CommentDTO>>() {
-    }.getType();
-
-    @Autowired
     CommentService commentService;
 
     @GetMapping
@@ -56,7 +46,8 @@ public class CommentController {
 
         try {
             List<Comment> list = commentService.findAll(sortBy, sortDir);
-            List<CommentDTO> listDTO = mapper.map(list, typeDTO);
+            List<CommentDTO> listDTO = list.stream().map(dto -> new CommentDTO(dto))
+                    .collect(Collectors.toList());
 
             response.setMessage("Comments listing obtain sucessfully");
             response.setError(false);
@@ -83,7 +74,7 @@ public class CommentController {
 
         try {
             Page<Comment> list = commentService.paginated(page, size, sortBy, sortDir);
-            Page<CommentDTO> listDTO = mapper.map(list, typePageDTO);
+            Page<CommentDTO> listDTO = list.map(CommentDTO::new);
 
             response.setMessage("Comments listing obtain sucessfully");
             response.setError(false);
@@ -106,7 +97,8 @@ public class CommentController {
 
         try {
             List<Comment> list = commentService.findByPublication(new Publication(id));
-            List<CommentDTO> listDTO = mapper.map(list, typeDTO);
+            List<CommentDTO> listDTO = list.stream().map(dto -> new CommentDTO(dto))
+                    .collect(Collectors.toList());
 
             response.setMessage("Comments listing obtain sucessfully");
             response.setError(false);
@@ -131,7 +123,7 @@ public class CommentController {
             if (entity.isPresent()) {
                 response.setMessage("Comment obtain sucessfully");
                 response.setError(false);
-                response.setData(mapper.map(entity.get(), CommentDTO.class));
+                response.setData(new CommentDTO(entity.get()));
             } else {
                 response.setMessage("Comment not found");
                 response.setError(true);
@@ -153,11 +145,11 @@ public class CommentController {
         CustomResponse<CommentDTO> response = new CustomResponse<>();
 
         try {
-            Comment persist = commentService.save(mapper.map(body, Comment.class));
+            Comment persist = commentService.save(body.build());
 
             response.setMessage("Comment create sucessfully");
             response.setError(false);
-            response.setData(mapper.map(persist, CommentDTO.class));
+            response.setData(new CommentDTO(persist));
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -178,11 +170,11 @@ public class CommentController {
             Optional<Comment> entity = commentService.findById(id);
             if (entity.isPresent()) {
                 body.setId(id);
-                Comment persist = commentService.save(mapper.map(body, Comment.class));
+                Comment persist = commentService.save(body.build());
 
                 response.setMessage("Comment update sucessfully");
                 response.setError(false);
-                response.setData(mapper.map(persist, CommentDTO.class));
+                response.setData(new CommentDTO(persist));
             } else {
                 response.setMessage("Comment not found");
                 response.setError(true);

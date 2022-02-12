@@ -11,8 +11,7 @@ import com.py.springbootrestblog.service.PublicationService;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -36,15 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class PublicationController {
 
     @Autowired
-    ModelMapper mapper;
-
-    Type typeDTO = new TypeToken<List<PublicationDTO>>() {
-    }.getType();
-
-    Type typePageDTO = new TypeToken<Page<PublicationDTO>>() {
-    }.getType();
-
-    @Autowired
     PublicationService publicationService;
 
     @GetMapping
@@ -56,11 +46,12 @@ public class PublicationController {
 
         try {
             List<Publication> list = publicationService.findAll(sortBy, sortDir);
-            List<PublicationDTO> listDto = mapper.map(list, typeDTO);
+            List<PublicationDTO> listDTO = list.stream().map(dto -> new PublicationDTO(dto))
+                    .collect(Collectors.toList());
 
             response.setMessage("Publications listing obtain sucessfully");
             response.setError(false);
-            response.setData(listDto);
+            response.setData(listDTO);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -83,7 +74,7 @@ public class PublicationController {
 
         try {
             Page<Publication> list = publicationService.paginated(page, size, sortBy, sortDir);
-            Page<PublicationDTO> listDto = mapper.map(list, typePageDTO);
+            Page<PublicationDTO> listDto = list.map(PublicationDTO::new);
 
             response.setMessage("Publications listing obtain sucessfully");
             response.setError(false);
@@ -108,7 +99,7 @@ public class PublicationController {
             if (entity.isPresent()) {
                 response.setMessage("Publication obtain sucessfully");
                 response.setError(false);
-                response.setData(mapper.map(entity.get(), PublicationDTO.class));
+                response.setData(new PublicationDTO(entity.get()));
             } else {
                 response.setMessage("Publication not found");
                 response.setError(true);
@@ -130,11 +121,11 @@ public class PublicationController {
         CustomResponse<PublicationDTO> response = new CustomResponse<>();
 
         try {
-            Publication persist = publicationService.save(mapper.map(body, Publication.class));
+            Publication persist = publicationService.save(body.build());
 
             response.setMessage("Publication create sucessfully");
             response.setError(false);
-            response.setData(mapper.map(persist, PublicationDTO.class));
+            response.setData(new PublicationDTO(persist));
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -155,11 +146,11 @@ public class PublicationController {
             Optional<Publication> entity = publicationService.findById(id);
             if (entity.isPresent()) {
                 body.setId(id);
-                Publication persist = publicationService.save(mapper.map(body, Publication.class));
+                Publication persist = publicationService.save(body.build());
 
                 response.setMessage("Publication update sucessfully");
                 response.setError(false);
-                response.setData(mapper.map(persist, PublicationDTO.class));
+                response.setData(new PublicationDTO(persist));
             } else {
                 response.setMessage("Publication not found");
                 response.setError(true);
