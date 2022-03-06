@@ -6,7 +6,10 @@ package com.py.springbootrestblog.controller;
 
 import com.py.springbootrestblog.dto.CustomResponse;
 import com.py.springbootrestblog.dto.UserDTO;
+import com.py.springbootrestblog.model.Role;
 import com.py.springbootrestblog.model.User;
+import com.py.springbootrestblog.model.UserRole;
+import com.py.springbootrestblog.service.UserRoleService;
 import com.py.springbootrestblog.service.UserService;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +39,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    UserRoleService userRoleService;
 
     @Autowired
     PasswordEncoder encoder;
@@ -145,6 +151,34 @@ public class UserController {
             response.setMessage("User create sucessfully");
             response.setError(false);
             response.setData(new UserDTO(persist));
+
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+
+            response.setMessage("User create unsucessfully: " + e.getMessage());
+            response.setError(true);
+            response.setData(null);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("{id}/role")
+    public ResponseEntity<CustomResponse<UserDTO>> assignRole(@PathVariable("id") Long id, @RequestBody List<Long> roles) {
+        CustomResponse<UserDTO> response = new CustomResponse<>();
+
+        try {
+            UserRole userRole;
+            for (Long role : roles) {
+                userRole = new UserRole();
+                userRole.setUser(new User(id));
+                userRole.setRole(new Role(role));
+
+                userRoleService.save(userRole);
+            }
+
+            response.setMessage("User Role create sucessfully");
+            response.setError(false);
+            response.setData(null);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {

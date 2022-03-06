@@ -5,11 +5,11 @@
 package com.py.springbootrestblog.model;
 
 import java.io.Serializable;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -17,26 +17,21 @@ import javax.persistence.Table;
  * @author Favio Amarilla
  */
 @Entity
-@Table(name = "roles")
-public class Role implements Serializable {
+@Table(name = "user_roles")
+public class UserRole implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 20)
-    private String name;
+    @ManyToOne(optional = false)
+    private User user;
 
-    public Role() {
+    @ManyToOne(optional = false)
+    private Role role;
 
-    }
+    public UserRole() {
 
-    public Role(Long id) {
-        this.id = id;
-    }
-
-    public Role(String name) {
-        this.name = name;
     }
 
     public Long getId() {
@@ -47,11 +42,20 @@ public class Role implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public User getUser() {
+        return user;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUser(User user) {
+        this.user = user;
     }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
 }
