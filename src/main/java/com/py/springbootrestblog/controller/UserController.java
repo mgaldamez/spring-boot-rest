@@ -5,9 +5,9 @@
 package com.py.springbootrestblog.controller;
 
 import com.py.springbootrestblog.dto.CustomResponse;
-import com.py.springbootrestblog.dto.PublicationDTO;
-import com.py.springbootrestblog.model.Publication;
-import com.py.springbootrestblog.service.PublicationService;
+import com.py.springbootrestblog.dto.UserDTO;
+import com.py.springbootrestblog.model.User;
+import com.py.springbootrestblog.service.UserService;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,32 +31,35 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Favio Amarilla
  */
 @RestController
-@RequestMapping("api/publication")
-public class PublicationController {
+@RequestMapping("api/user")
+public class UserController {
 
     @Autowired
-    PublicationService publicationService;
+    UserService userService;
+
+    @Autowired
+    PasswordEncoder encoder;
 
     @GetMapping
-    public ResponseEntity<CustomResponse<List<PublicationDTO>>> findAll(
+    public ResponseEntity<CustomResponse<List<UserDTO>>> findAll(
             @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir) {
 
-        CustomResponse<List<PublicationDTO>> response = new CustomResponse<>();
+        CustomResponse<List<UserDTO>> response = new CustomResponse<>();
 
         try {
-            List<Publication> list = publicationService.findAll(sortBy, sortDir);
-            List<PublicationDTO> listDTO = list.stream().map(dto -> new PublicationDTO(dto))
+            List<User> list = userService.findAll(sortBy, sortDir);
+            List<UserDTO> listDTO = list.stream().map(dto -> new UserDTO(dto))
                     .collect(Collectors.toList());
 
-            response.setMessage("Publications listing obtain sucessfully");
+            response.setMessage("Users listing obtain sucessfully");
             response.setError(false);
             response.setData(listDTO);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publications listing obtain unsucessfully: " + e.getMessage());
+            response.setMessage("Users listing obtain unsucessfully: " + e.getMessage());
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -63,26 +67,26 @@ public class PublicationController {
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<CustomResponse<Page<PublicationDTO>>> paginated(
+    public ResponseEntity<CustomResponse<Page<UserDTO>>> paginated(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
             @RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir
     ) {
-        CustomResponse<Page<PublicationDTO>> response = new CustomResponse<>();
+        CustomResponse<Page<UserDTO>> response = new CustomResponse<>();
 
         try {
-            Page<Publication> list = publicationService.paginated(page, size, sortBy, sortDir);
-            Page<PublicationDTO> listDto = list.map(PublicationDTO::new);
+            Page<User> list = userService.paginated(page, size, sortBy, sortDir);
+            Page<UserDTO> listDto = list.map(UserDTO::new);
 
-            response.setMessage("Publications listing obtain sucessfully");
+            response.setMessage("Users listing obtain sucessfully");
             response.setError(false);
             response.setData(listDto);
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publications listing obtain unsucessfully: " + e.getMessage());
+            response.setMessage("Users listing obtain unsucessfully: " + e.getMessage());
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -90,17 +94,17 @@ public class PublicationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomResponse<PublicationDTO>> findById(@PathVariable("id") Long id) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+    public ResponseEntity<CustomResponse<UserDTO>> findById(@PathVariable("id") Long id) {
+        CustomResponse<UserDTO> response = new CustomResponse<>();
 
         try {
-            Optional<Publication> entity = publicationService.findById(id);
+            Optional<User> entity = userService.findById(id);
             if (entity.isPresent()) {
-                response.setMessage("Publication obtain sucessfully");
+                response.setMessage("User obtain sucessfully");
                 response.setError(false);
-                response.setData(new PublicationDTO(entity.get()));
+                response.setData(new UserDTO(entity.get()));
             } else {
-                response.setMessage("Publication not found");
+                response.setMessage("User not found");
                 response.setError(true);
                 response.setData(null);
             }
@@ -108,7 +112,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication obtain unsucessfully");
+            response.setMessage("User obtain unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -116,20 +120,36 @@ public class PublicationController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomResponse<PublicationDTO>> save(@RequestBody PublicationDTO body) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+    public ResponseEntity<CustomResponse<UserDTO>> save(@RequestBody UserDTO body) {
+        CustomResponse<UserDTO> response = new CustomResponse<>();
 
         try {
-            Publication persist = publicationService.save(body.build());
 
-            response.setMessage("Publication create sucessfully");
+            if (userService.existsByUsername(body.getUsername())) {
+                response.setMessage("Username is already taken");
+                response.setError(true);
+                response.setData(null);
+                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            }
+
+            if (userService.existsByEmail(body.getEmail())) {
+                response.setMessage("Email is already in use");
+                response.setError(true);
+                response.setData(null);
+                return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            }
+            body.setPassword(encoder.encode(body.getPassword()));
+
+            User persist = userService.save(body.build());
+
+            response.setMessage("User create sucessfully");
             response.setError(false);
-            response.setData(new PublicationDTO(persist));
+            response.setData(new UserDTO(persist));
 
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication create unsucessfully");
+            response.setMessage("User create unsucessfully: " + e.getMessage());
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -137,21 +157,21 @@ public class PublicationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomResponse<PublicationDTO>> update(@RequestBody PublicationDTO body,
+    public ResponseEntity<CustomResponse<UserDTO>> update(@RequestBody UserDTO body,
             @PathVariable("id") Long id) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+        CustomResponse<UserDTO> response = new CustomResponse<>();
 
         try {
-            Optional<Publication> entity = publicationService.findById(id);
+            Optional<User> entity = userService.findById(id);
             if (entity.isPresent()) {
                 body.setId(id);
-                Publication persist = publicationService.save(body.build());
+                User persist = userService.save(body.build());
 
-                response.setMessage("Publication update sucessfully");
+                response.setMessage("User update sucessfully");
                 response.setError(false);
-                response.setData(new PublicationDTO(persist));
+                response.setData(new UserDTO(persist));
             } else {
-                response.setMessage("Publication not found");
+                response.setMessage("User not found");
                 response.setError(true);
                 response.setData(null);
             }
@@ -159,7 +179,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication update unsucessfully");
+            response.setMessage("User update unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
@@ -167,20 +187,20 @@ public class PublicationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CustomResponse<PublicationDTO>> delete(@RequestBody PublicationDTO body,
+    public ResponseEntity<CustomResponse<UserDTO>> delete(@RequestBody UserDTO body,
             @PathVariable("id") Long id) {
-        CustomResponse<PublicationDTO> response = new CustomResponse<>();
+        CustomResponse<UserDTO> response = new CustomResponse<>();
 
         try {
-            Optional<Publication> entity = publicationService.findById(id);
+            Optional<User> entity = userService.findById(id);
             if (entity.isPresent()) {
-                publicationService.delete(id);
+                userService.delete(id);
 
-                response.setMessage("Publication delete sucessfully");
+                response.setMessage("User delete sucessfully");
                 response.setError(false);
                 response.setData(null);
             } else {
-                response.setMessage("Publication not found");
+                response.setMessage("User not found");
                 response.setError(true);
                 response.setData(null);
             }
@@ -188,7 +208,7 @@ public class PublicationController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
 
-            response.setMessage("Publication delete unsucessfully");
+            response.setMessage("User delete unsucessfully");
             response.setError(true);
             response.setData(null);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);

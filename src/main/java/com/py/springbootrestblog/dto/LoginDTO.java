@@ -5,27 +5,32 @@
 package com.py.springbootrestblog.dto;
 
 import com.py.springbootrestblog.model.User;
+import java.util.List;
 
 /**
  *
  * @author Favio Amarilla
  */
-public class UserDTO {
+public class LoginDTO {
 
     private Long id;
     private String name;
     private String username;
     private String email;
     private String password;
+    private List<String> role;
+    private List<String> permisions;
+    private String token;
 
-    public UserDTO() {
+    public LoginDTO() {
     }
 
-    public UserDTO(User entity) {
+    public LoginDTO(User entity) {
         this.id = entity.getId();
         this.name = entity.getName();
         this.username = entity.getUsername();
         this.email = entity.getEmail();
+        this.password = entity.getPassword();
     }
 
     public User build() {
@@ -34,17 +39,18 @@ public class UserDTO {
         entity.setName(this.name);
         entity.setUsername(this.username);
         entity.setEmail(this.email);
-        entity.setPassword(this.password);
 
         return entity;
     }
 
-    public UserDTO(Long id, String name, String username, String email, String password) {
+    public LoginDTO(Long id, String name, String username, String email, String password, List<String> role, String token) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.role = role;
+        this.token = token;
     }
 
     public Long getId() {
@@ -85,6 +91,22 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<String> getRole() {
+        return role;
+    }
+
+    public void ListRole(List<String> role) {
+        this.role = role;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
 }
