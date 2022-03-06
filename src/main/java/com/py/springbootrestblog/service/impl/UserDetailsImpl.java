@@ -5,10 +5,14 @@
 package com.py.springbootrestblog.service.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.py.springbootrestblog.model.Permision;
+import com.py.springbootrestblog.model.Role;
 import com.py.springbootrestblog.model.User;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,9 +44,14 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        for (Role role : user.getRoles()) {
+            for (Permision permision : role.getPermisions()) {
+                authorities.add(new SimpleGrantedAuthority(permision.getName()));
+
+            }
+        }
 
         return new UserDetailsImpl(
                 user.getId(),

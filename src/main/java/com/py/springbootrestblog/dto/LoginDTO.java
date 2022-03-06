@@ -18,7 +18,6 @@ public class LoginDTO {
     private String username;
     private String email;
     private String password;
-    private List<String> role;
     private List<String> permisions;
     private String token;
 
@@ -43,13 +42,13 @@ public class LoginDTO {
         return entity;
     }
 
-    public LoginDTO(Long id, String name, String username, String email, String password, List<String> role, String token) {
+    public LoginDTO(Long id, String name, String username, String email, String password, List<String> permisions, String token) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.role = role;
+        this.permisions = permisions;
         this.token = token;
     }
 
@@ -93,12 +92,12 @@ public class LoginDTO {
         this.password = password;
     }
 
-    public List<String> getRole() {
-        return role;
+    public List<String> getPermisions() {
+        return permisions;
     }
 
-    public void ListRole(List<String> role) {
-        this.role = role;
+    public void setPermisions(List<String> permisions) {
+        this.permisions = permisions;
     }
 
     public String getToken() {

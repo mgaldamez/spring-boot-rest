@@ -64,12 +64,12 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        List<String> rolesList = userDetails.getAuthorities().stream()
+        List<String> permisions = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
         LoginDTO userResponse = new LoginDTO(userDetails.getId(), userDetails.getName(),
-                userDetails.getUsername(), userDetails.getEmail(), null, rolesList, jwt);
+                userDetails.getUsername(), userDetails.getEmail(), null, permisions, jwt);
 
         CustomResponse<LoginDTO> response = new CustomResponse<>();
         response.setMessage("Access sucessfully");

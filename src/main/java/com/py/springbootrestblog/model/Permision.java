@@ -2,37 +2,40 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.py.springbootrestblog.dto;
+package com.py.springbootrestblog.model;
 
-import com.py.springbootrestblog.model.Role;
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  *
  * @author Favio Amarilla
  */
-public class RoleDTO {
+@Entity
+@Table(name = "permision")
+public class Permision implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(length = 20)
     private String name;
 
-    public RoleDTO() {
+    public Permision() {
+
     }
 
-    public RoleDTO(Role entity) {
-        this.id = entity.getId();
-        this.name = entity.getName();
-    }
-
-    public Role build() {
-        Role entity = new Role();
-        entity.setId(this.id);
-        entity.setName(this.name);
-
-        return entity;
-    }
-
-    public RoleDTO(Long id, String name, String username, String email, String password) {
+    public Permision(Long id) {
         this.id = id;
+    }
+
+    public Permision(String name) {
         this.name = name;
     }
 
@@ -51,5 +54,4 @@ public class RoleDTO {
     public void setName(String name) {
         this.name = name;
     }
-
 }

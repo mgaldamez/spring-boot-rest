@@ -5,7 +5,6 @@
 package com.py.springbootrestblog.dto;
 
 import com.py.springbootrestblog.model.Comment;
-import com.py.springbootrestblog.model.Publication;
 
 /**
  *

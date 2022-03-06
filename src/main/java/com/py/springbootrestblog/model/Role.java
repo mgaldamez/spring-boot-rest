@@ -5,11 +5,17 @@
 package com.py.springbootrestblog.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 /**
@@ -26,6 +32,12 @@ public class Role implements Serializable {
 
     @Column(length = 20)
     private String name;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "role_permision",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permision_id"))
+    private List<Permision> permisions = new ArrayList<>();
 
     public Role() {
 
@@ -54,4 +66,13 @@ public class Role implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
+    public List<Permision> getPermisions() {
+        return permisions;
+    }
+
+    public void setPermisions(List<Permision> permisions) {
+        this.permisions = permisions;
+    }
+
 }

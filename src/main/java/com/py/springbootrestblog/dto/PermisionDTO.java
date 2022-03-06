@@ -4,34 +4,34 @@
  */
 package com.py.springbootrestblog.dto;
 
-import com.py.springbootrestblog.model.Role;
+import com.py.springbootrestblog.model.Permision;
 
 /**
  *
  * @author Favio Amarilla
  */
-public class RoleDTO {
+public class PermisionDTO {
 
     private Long id;
     private String name;
 
-    public RoleDTO() {
+    public PermisionDTO() {
     }
 
-    public RoleDTO(Role entity) {
+    public PermisionDTO(Permision entity) {
         this.id = entity.getId();
         this.name = entity.getName();
     }
 
-    public Role build() {
-        Role entity = new Role();
+    public Permision build() {
+        Permision entity = new Permision();
         entity.setId(this.id);
         entity.setName(this.name);
 
         return entity;
     }
 
-    public RoleDTO(Long id, String name, String username, String email, String password) {
+    public PermisionDTO(Long id, String name, String username, String email, String password) {
         this.id = id;
         this.name = name;
     }
